@@ -32,12 +32,9 @@
 				overflow: hidden;
 			}
 			iframe {
-				width: 0;
-				height: 0;
+				width: 480px;
+				height: 320px;
 				display: inline-block;
-				position: absolute;
-				top: 0;
-				left: 0;
 				border: none;
 			}
 			#canvas {
@@ -233,17 +230,14 @@
 			<div class="flex-container">
 				<div id="editor">print("Hello world")</div>
 				<div class="display-objects">
-					
-					<canvas id="canvas" title="This is the virtual LittlevGL screen" width="480" height="320" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+					<iframe src="about:blank" id="emscripten-iframe"></iframe>			
 									<div id="mp_js_stdout_wrapper">
 											<div id="mp_js_stdout"></div>
 									</div>
 									
 				</div>
 			</div>
-		</div>
-		<iframe src="about:blank" id="emscripten-iframe"></iframe>
-        
+		</div>        
 		<script src="frontend_src/main.js"></script>
 	</body>
 </html>

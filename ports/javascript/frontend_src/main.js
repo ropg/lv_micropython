@@ -93,6 +93,28 @@ function update_query_string( uri, key, value ) {
 	return a.href;
 }
 
+/* based on https://stackoverflow.com/a/1634841 */
+function remove_query_string(url, parameter) {
+    //prefer to use l.search if you have a location/link object
+    var urlparts = url.split('?');   
+    if (urlparts.length >= 2) {
+
+        var prefix = encodeURIComponent(parameter) + '=';
+        var pars = urlparts[1].split(/[&;]/g);
+
+        //reverse iteration as may be destructive
+        for (var i = pars.length; i-- > 0;) {    
+            //idiom for string.startsWith
+            if (pars[i].lastIndexOf(prefix, 0) !== -1) {  
+                pars.splice(i, 1);
+            }
+        }
+
+        return urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : '');
+    }
+    return url;
+}
+
 
 var editor_cmd=0;
 
@@ -146,7 +168,10 @@ function load_revision(revision, update_history, cb){
       history.value = 0;
     }
     let link = document.getElementById("link");
-    link.setAttribute("href", update_query_string(window.location.href, query_revision, current_revision));
+    let newurl = update_query_string(window.location.href, query_revision, current_revision);
+    newurl = remove_query_string(newurl, "script_startup");
+    newurl = remove_query_string(newurl, "script");
+    link.setAttribute("href", newurl);
     link.textContent = "Link to online script";
     clear_dirty();
     if(cb != undefined)
@@ -155,6 +180,8 @@ function load_revision(revision, update_history, cb){
     console.log(err);
   });
 }
+
+window.load_revision = load_revision;
 
 window.save = function(event){
   event.target.disabled = true;
@@ -168,7 +195,7 @@ window.save = function(event){
     "text": getEditorValue(),
     "original_revision": current_revision
   }).then(res=>{
-    load_revision(res.data.revision, true);
+    window.load_revision(res.data.revision, true);
     fin();
   }).catch(err=>{
     console.log('ERROR: ' + err.message);
@@ -273,10 +300,6 @@ window.runScript = function() {
     term.write('\x1bc');
     
 
-    const context = document.getElementById("canvas").getContext('2d');
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
 
     iframe.setAttribute("data-cscript", LZString.compressToEncodedURIComponent(getEditorValue()));
 
@@ -376,7 +399,7 @@ function processScriptArg(url, lzstring){
         external_link = null;
         // decompress LZString
         current_revision = url;
-        load_revision(current_revision, true, function() {
+        window.load_revision(current_revision, true, function() {
             script_passed_handler();
         });
     }

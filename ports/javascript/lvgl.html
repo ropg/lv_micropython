@@ -3,8 +3,11 @@
 <html>
   <head>
     <style>
-		body {
+		html, body {
 			width: 100%;
+			height: 100%;
+			max-width: 100%;
+			max-height: 100%;
 			box-sizing: border-box;
 			padding: 0;
 			margin: 0;
@@ -17,10 +20,10 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.js" type="text/javascript" charset="utf-8"></script>
   </head>
   <body>
+        <canvas id="canvas" width="480" height="320" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
 	<!-- scripts -->
 	<script src="docs/wasm_file_api.js"></script>
-    <script src="lvgl_mp.js"></script>
-    <script>
+        <script>
 		var mp_js_stdout;
 		/*Write text to the terminal */
 		function sendText(text) {
@@ -69,10 +72,6 @@
 			return custom;
 		}
 
-		Module.canvas = (function() {
-			var canvas = window.top.document.getElementById('canvas');
-			return canvas;
-		})(); 
 		var lines = [
 			"import lvgl as lv",
 			"lv.init()",
@@ -109,13 +108,17 @@
 		/*Initialization function*/
 		function startRunning() {
 			/*Setup printing event handler*/
+ 			const context = document.getElementById("canvas").getContext('2d');
+
+			context.clearRect(0, 0, canvas.width, canvas.height);
+
 
 			mp_js_stdout = window.parent.document.getElementById("mp_js_stdout");
 			if(mp_js_stdout === undefined || mp_js_stdout === null) {
 				throw "Could not retrieve parent element";
 			}
 			/*Initialize MicroPython itself*/
-			mp_js_init(1 * 1024 * 1024); 
+			window.mp_js_init(1 * 1024 * 1024); 
 
 			var compressedScript = window.parent.document.getElementById("emscripten-iframe").getAttribute("data-cscript");
 			if(compressedScript !== undefined && compressedScript !== null)
@@ -133,14 +136,10 @@
 			handle_pending();
 			window.top.reenableButton();
 		}
-		window.onload = function() {
-			console.log("onload");
-			
-			startRunning();
-		}
-
+ 		window.startRunningL = startRunning;
 
     </script>
+        <script src="lvgl_mp.js"></script>
   </body>
 </html>
 

@@ -25,6 +25,7 @@
  */
 
 var Module = {};
+Module['canvas'] = document.getElementById("canvas");
 
 Module['print'] = function(text) {
     if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
@@ -39,10 +40,12 @@ Module['printErr'] = function(text) {
 }
 var mainProgram = function()
 {
-  mp_js_init = Module.cwrap('mp_js_init', 'null', ['number']);
-  mp_js_do_str = Module.cwrap('mp_js_do_str', 'null', ['string']);
-  mp_js_init_repl = Module.cwrap('mp_js_init_repl', 'null', ['null']);
-  mp_js_process_char = Module.cwrap('mp_js_process_char', 'number', ['number']);
+  window.mp_js_init = Module.cwrap('mp_js_init', 'null', ['number']);
+  window.mp_js_do_str = Module.cwrap('mp_js_do_str', 'null', ['string']);
+  window.mp_js_init_repl = Module.cwrap('mp_js_init_repl', 'null', ['null']);
+  window.mp_js_process_char = Module.cwrap('mp_js_process_char', 'number', ['number']);
+  console.log("on runtime init");
+  window.startRunningL();
 
   MP_JS_EPOCH = (new Date()).getTime();
 

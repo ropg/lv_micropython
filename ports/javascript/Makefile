@@ -2,15 +2,13 @@
 WASM_FILE_API = 1
 FROZEN_DIR ?= modules
 
-LV_CFLAGS:= -DLV_FONT_CUSTOM_DECLARE="LV_FONT_DECLARE(lv_font_heb_16)"
+#LV_CFLAGS:= -DLV_FONT_CUSTOM_DECLARE="LV_FONT_DECLARE(lv_font_heb_16)"
 
 include ../../py/mkenv.mk
 
 CROSS = 0
 
-
-
-
+USE_WASM ?= 1
 
 QSTR_DEFS = qstrdefsport.h
 
@@ -25,11 +23,12 @@ LDFLAGS ?= -m32 -Wl,--gc-sections
 CFLAGS ?= -m32
 
 #default debug options for browser debugger
-JSFLAGS ?= --source-map-base http://localhost:8000
+JSFLAGS += -s USE_SDL=2 -s WASM=$(USE_WASM)
+JSFLAGS += --source-map-base http://localhost:8000
 
 #Debugging/Optimization
 ifeq ($(DEBUG), 1)
-CFLAGS += -O0 -g4
+CFLAGS += -O0 -g3
 else
 CFLAGS += -Oz -g0 -DNDEBUG
 endif
@@ -38,9 +37,8 @@ CFLAGS += -Wall -Werror $(INC) -std=gnu11 $(COPT)
 CFLAGS += -fdata-sections -ffunction-sections
 CFLAGS += $(CFLAGS_MOD)
 
-JSFLAGS += -s USE_SDL=2 -s WASM=0
 JSFLAGS += --memory-init-file 0 --js-library library.js
-JSFLAGS += -s EXTRA_EXPORTED_RUNTIME_METHODS="['ccall', 'cwrap']"
+JSFLAGS += -s EXTRA_EXPORTED_RUNTIME_METHODS="['ccall', 'cwrap']" -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1
 JSFLAGS += -s EXPORTED_FUNCTIONS="['_mp_js_init', '_mp_js_init_repl', '_mp_js_do_str', '_mp_js_process_char', '_mp_hal_get_interrupt_char', '_mp_keyboard_interrupt', '_mp_handle_pending' ]" 
 
 ifdef EMSCRIPTEN
@@ -54,8 +52,10 @@ ifdef EMSCRIPTEN
 
 	#check if not using emscripten-upstream branch
 	ifeq (,$(findstring upstream/bin, $(EMMAKEN_COMPILER)))
-		JSFLAGS += -s "BINARYEN_TRAP_MODE='clamp'"
-		LDFLAGS += -Wl,-Map=$@.map,--cref
+		ifeq ($(USE_WASM), 0)
+#			JSFLAGS += -s "BINARYEN_TRAP_MODE='clamp'"
+			LDFLAGS += -Wl,-Map=$@.map,--cref
+		endif
 	endif  
 	
 	CC = emcc $(JSFLAGS)
@@ -140,6 +140,7 @@ $(BUILD)/micropython.js: $(OBJ) library.js wrapper.js
 	$(Q)emcc $(LDFLAGS) -o $(BUILD)/firmware.js $(OBJ) $(JSFLAGS)
 	cat wrapper.js $(BUILD)/firmware.js > $@
 	cp $@ $(BUILD)/../lvgl_mp.js
+	([ -e "$(BUILD)/firmware.wasm" ] && cp $(BUILD)/firmware.wasm $(BUILD)/..) || /bin/true
 
 min: $(BUILD)/micropython.js
 	uglifyjs $< -c -o $(BUILD)/micropython.min.js
