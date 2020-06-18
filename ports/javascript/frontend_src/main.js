@@ -171,6 +171,11 @@ function load_revision(revision, update_history, cb){
     let newurl = update_query_string(window.location.href, query_revision, current_revision);
     newurl = remove_query_string(newurl, "script_startup");
     newurl = remove_query_string(newurl, "script");
+    try {
+        window.history.replaceState({}, document.title, newurl);
+    } catch(e) {
+        console.error(e);
+    }
     link.setAttribute("href", newurl);
     link.textContent = "Link to online script";
     clear_dirty();
