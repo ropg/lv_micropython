@@ -3,7 +3,7 @@
 ![Build lv_micropython unix port](https://github.com/lvgl/lv_micropython/workflows/Build%20lv_micropython%20unix%20port/badge.svg)
 ![Build lv_micropython stm32 port](https://github.com/lvgl/lv_micropython/workflows/Build%20lv_micropython%20stm32%20port/badge.svg)
 
-**For information abound Micropython lvgl bindings please refrer to [lv_bindings/README.md](https://github.com/lvgl/lv_bindings/blob/master/README.md)**
+**For information abound Micropython lvgl bindings please refrer to [lv_binding_micropython/README.md](https://github.com/lvgl/lv_bindings/blob/master/README.md)**
 
 See also [Micropython + LittlevGL](https://blog.lvgl.io/2019-02-20/micropython-bindings) blog post. (LittlevGL is LVGL's previous name.)
 For questions and discussions - please use the forum: https://forum.lvgl.io/c/micropython
